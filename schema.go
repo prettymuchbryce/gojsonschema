@@ -30,9 +30,10 @@ import (
 	//	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/xeipuuv/gojsonreference"
 	"reflect"
 	"regexp"
+
+	"github.com/xeipuuv/gojsonreference"
 )
 
 func NewSchema(l JSONLoader) (*Schema, error) {
@@ -44,6 +45,7 @@ type Schema struct {
 	rootSchema        *subSchema
 	pool              *schemaPool
 	referencePool     *schemaReferencePool
+	customKeywords    []CustomKeyword
 }
 
 func (d *Schema) parse(document interface{}) error {
@@ -536,6 +538,16 @@ func (d *Schema) parseSchema(documentNode interface{}, currentSchema *subSchema)
 			}
 		} else {
 			return errors.New(fmt.Sprintf(ERROR_MESSAGE_X_MUST_BE_AN_Y, KEY_NOT, TYPE_OBJECT))
+		}
+	}
+
+	// validation : custom keywords
+	for i := 0; i < len(d.customKeywords); i++ {
+		if existsMapKey(m, d.customKeywords[i].GetKeyword()) {
+			customKeywordValue := customKeywordValue{}
+			customKeywordValue.customKeyword = d.customKeywords[i]
+			customKeywordValue.value = m[d.customKeywords[i].GetKeyword()]
+			currentSchema.customKeywords = append(currentSchema.customKeywords, customKeywordValue)
 		}
 	}
 

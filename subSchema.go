@@ -29,9 +29,10 @@ package gojsonschema
 import (
 	"errors"
 	"fmt"
-	"github.com/xeipuuv/gojsonreference"
 	"regexp"
 	"strings"
+
+	"github.com/xeipuuv/gojsonreference"
 )
 
 const (
@@ -112,6 +113,8 @@ type subSchema struct {
 	minProperties *int
 	maxProperties *int
 	required      []string
+
+	customKeywords []customKeywordValue
 
 	dependencies         map[string]interface{}
 	additionalProperties interface{}

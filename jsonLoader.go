@@ -30,10 +30,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/xeipuuv/gojsonreference"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/xeipuuv/gojsonreference"
 )
 
 // JSON loader interface
@@ -48,11 +49,16 @@ type JSONLoader interface {
 // references are used to load JSONs from files and HTTP
 
 type jsonReferenceLoader struct {
-	source string
+	source         string
+	customKeywords []CustomKeyword
 }
 
 func (l *jsonReferenceLoader) jsonSource() interface{} {
 	return l.source
+}
+
+func (l *jsonReferenceLoader) AddCustomKeyword(ck CustomKeyword) {
+	l.customKeywords = append(l.customKeywords, ck)
 }
 
 func NewReferenceLoader(source string) *jsonReferenceLoader {
@@ -99,6 +105,7 @@ func (l *jsonReferenceLoader) loadSchema() (*Schema, error) {
 	var err error
 
 	d := Schema{}
+	d.customKeywords = l.customKeywords
 	d.pool = newSchemaPool()
 	d.referencePool = newSchemaReferencePool()
 
@@ -166,7 +173,12 @@ func (l *jsonReferenceLoader) loadFromFile(path string) (interface{}, error) {
 // JSON string loader
 
 type jsonStringLoader struct {
-	source string
+	source         string
+	customKeywords []CustomKeyword
+}
+
+func (l *jsonStringLoader) AddCustomKeyword(ck CustomKeyword) {
+	l.customKeywords = append(l.customKeywords, ck)
 }
 
 func (l *jsonStringLoader) jsonSource() interface{} {
@@ -200,6 +212,7 @@ func (l *jsonStringLoader) loadSchema() (*Schema, error) {
 	}
 
 	d := Schema{}
+	d.customKeywords = l.customKeywords
 	d.pool = newSchemaPool()
 	d.referencePool = newSchemaReferencePool()
 	d.documentReference, err = gojsonreference.NewJsonReference("#")
@@ -221,7 +234,12 @@ func (l *jsonStringLoader) loadSchema() (*Schema, error) {
 // used to load JSONs from the code as maps, interface{}, structs ...
 
 type jsonGoLoader struct {
-	source interface{}
+	source         interface{}
+	customKeywords []CustomKeyword
+}
+
+func (l *jsonGoLoader) AddCustomKeyword(ck CustomKeyword) {
+	l.customKeywords = append(l.customKeywords, ck)
 }
 
 func (l *jsonGoLoader) jsonSource() interface{} {
@@ -262,6 +280,7 @@ func (l *jsonGoLoader) loadSchema() (*Schema, error) {
 	}
 
 	d := Schema{}
+	d.customKeywords = l.customKeywords
 	d.pool = newSchemaPool()
 	d.referencePool = newSchemaReferencePool()
 	d.documentReference, err = gojsonreference.NewJsonReference("#")
